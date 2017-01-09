@@ -19,28 +19,13 @@ namespace "test" do
 
     require "bootstrap/environment"
     LogStash::Bundler.setup!({:without => [:build]})
-    require "logstash-core"
-
     require "rspec/core/runner"
     require "rspec"
     require 'ci/reporter/rake/rspec_loader'
   end
 
   def core_specs
-    # note that regardless if which logstash-core-event-* gem is live, we will always run the
-    # logstash-core-event specs since currently this is the most complete Event and Timestamp specs
-    # which actually defines the Event contract and should pass regardless of the actuall underlying
-    # implementation.
-    specs = ["spec/unit/**/*_spec.rb", "logstash-core/spec/**/*_spec.rb", "logstash-core-event/spec/**/*_spec.rb"]
-
-    # figure if the logstash-core-event-java gem is loaded and if so add its specific specs in the core specs to run
-    begin
-      require "logstash-core-event-java/version"
-      specs << "logstash-core-event-java/spec/**/*_spec.rb"
-    rescue LoadError
-      # logstash-core-event-java gem is not live, ignore and skip specs
-    end
-
+    specs = ["spec/unit/**/*_spec.rb", "spec/**/*_spec.rb"].uniq
     Rake::FileList[*specs]
   end
 

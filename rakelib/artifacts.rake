@@ -18,23 +18,7 @@ namespace "artifact" do
       "lib/bootstrap/**/*",
       "lib/pluginmanager/**/*",
       "lib/systeminstall/**/*",
-
-      "logstash-core/lib/**/*",
-      "logstash-core/locales/**/*",
-      "logstash-core/vendor/**/*",
-      "logstash-core/*.gemspec",
-      "logstash-core/gemspec_jars.rb",
-
-      "logstash-core-event-java/lib/**/*",
-      "logstash-core-event-java/*.gemspec",
-      "logstash-core-event-java/gemspec_jars.rb",
-
-      "logstash-core-queue-jruby/lib/**/*",
-      "logstash-core-queue-jruby/*.gemspec",
-      "logstash-core-queue-jruby/gemspec_jars.rb",
-
-      "logstash-core-plugin-api/lib/**/*",
-      "logstash-core-plugin-api/*.gemspec",
+      "lib/logstash/**/*",
 
       "patterns/**/*",
       "vendor/??*/**/*",
@@ -109,10 +93,7 @@ namespace "artifact" do
 
   desc "Generate logstash core gems"
   task "gems" => ["prepare"] do
-    Rake::Task["artifact:build-logstash-core"].invoke
-    Rake::Task["artifact:build-logstash-core-event"].invoke
     Rake::Task["artifact:build-logstash-core-plugin-api"].invoke
-    Rake::Task["artifact:build-logstash-core-queue-jruby"].invoke
   end
 
   # "all-plugins" version of tasks
@@ -160,47 +141,6 @@ namespace "artifact" do
     File.open(".bundle/config", "w") { }
   end
 
-  # locate the "gem "logstash-core" ..." line in Gemfile, and if the :path => "..." option if specified
-  # build the local logstash-core gem otherwise just do nothing, bundler will deal with it.
-  task "build-logstash-core" do
-    # regex which matches a Gemfile gem definition for the logstash-core gem and captures the :path option
-    gem_line_regex = /^\s*gem\s+["']logstash-core["'](?:\s*,\s*["'][^"^']+["'])?(?:\s*,\s*:path\s*=>\s*["']([^"^']+)["'])?/i
-
-    lines = File.readlines("Gemfile")
-    matches = lines.select{|line| line[gem_line_regex]}
-    abort("ERROR: Gemfile format error, need a single logstash-core gem specification") if matches.size != 1
-
-    path = matches.first[gem_line_regex, 1]
-
-    if path
-      Rake::Task["plugin:build-local-core-gem"].invoke("logstash-core", path)
-    else
-      puts "The Gemfile should reference \"logstash-core\" gem locally through :path, but found instead: #{matches}"
-      exit(1)
-    end
-  end
-
-  # # locate the "gem "logstash-core-event*" ..." line in Gemfile, and if the :path => "." option if specified
-  # # build the local logstash-core-event* gem otherwise just do nothing, bundler will deal with it.
-  task "build-logstash-core-event" do
-    # regex which matches a Gemfile gem definition for the logstash-core-event* gem and captures the gem name and :path option
-    gem_line_regex = /^\s*gem\s+["'](logstash-core-event[^"^']*)["'](?:\s*,\s*["'][^"^']+["'])?(?:\s*,\s*:path\s*=>\s*["']([^"^']+)["'])?/i
-
-    lines = File.readlines("Gemfile")
-    matches = lines.select{|line| line[gem_line_regex]}
-    abort("ERROR: Gemfile format error, need a single logstash-core-event gem specification") if matches.size != 1
-
-    name = matches.first[gem_line_regex, 1]
-    path = matches.first[gem_line_regex, 2]
-
-    if path
-      Rake::Task["plugin:build-local-core-gem"].invoke(name, path)
-    else
-      puts "The Gemfile should reference \"logstash-core-event\" gem locally through :path, but found instead: #{matches}"
-      exit(1)
-    end
-  end
-
   # locate the "gem "logstash-core-plugin-api" ..." line in Gemfile, and if the :path => "..." option if specified
   # build the local logstash-core-plugin-api gem otherwise just do nothing, bundler will deal with it.
   task "build-logstash-core-plugin-api" do
@@ -217,24 +157,6 @@ namespace "artifact" do
       Rake::Task["plugin:build-local-core-gem"].invoke("logstash-core-plugin-api", path)
     else
       puts "The Gemfile should reference \"logstash-core-plugin-api\" gem locally through :path, but found instead: #{matches}"
-      exit(1)
-    end
-  end
-
-  task "build-logstash-core-queue-jruby" do
-    # regex which matches a Gemfile gem definition for the logstash-core gem and captures the :path option
-    gem_line_regex = /^\s*gem\s+["']logstash-core-queue-jruby["'](?:\s*,\s*["'][^"^']+["'])?(?:\s*,\s*:path\s*=>\s*["']([^"^']+)["'])?/i
-
-    lines = File.readlines("Gemfile")
-    matches = lines.select{|line| line[gem_line_regex]}
-    abort("ERROR: Gemfile format error, need a single logstash-core-queue-jruby gem specification") if matches.size != 1
-
-    path = matches.first[gem_line_regex, 1]
-
-    if path
-      Rake::Task["plugin:build-local-core-gem"].invoke("logstash-core-queue-jruby", path)
-    else
-      puts "The Gemfile should reference \"logstash-core-queue-jruby\" gem locally through :path, but found instead: #{matches}"
       exit(1)
     end
   end
@@ -264,7 +186,7 @@ namespace "artifact" do
     end
 
     # add build.rb to tar
-    metadata_file_path_in_tar = File.join("logstash-core", "lib", "logstash", "build.rb")
+    metadata_file_path_in_tar = File.join("lib", "logstash", "build.rb")
     path_in_tar = File.join("logstash-#{LOGSTASH_VERSION}#{PACKAGE_SUFFIX}", metadata_file_path_in_tar)
     write_to_tar(tar, BUILD_METADATA_FILE.path, path_in_tar)
 
@@ -308,7 +230,7 @@ namespace "artifact" do
       end
 
       # add build.rb to zip
-      metadata_file_path_in_zip = File.join("logstash-core", "lib", "logstash", "build.rb")
+      metadata_file_path_in_zip = File.join("lib", "logstash", "build.rb")
       path_in_zip = File.join("logstash-#{LOGSTASH_VERSION}#{PACKAGE_SUFFIX}", metadata_file_path_in_zip)
       path = BUILD_METADATA_FILE.path
       Zip.continue_on_exists_proc = true
@@ -325,7 +247,7 @@ namespace "artifact" do
 
     dir = FPM::Package::Dir.new
 
-    metadata_file_path = File.join("logstash-core", "lib", "logstash", "build.rb")
+    metadata_file_path = File.join("lib", "logstash", "build.rb")
     metadata_source_file_path = BUILD_METADATA_FILE.path
     dir.input("#{metadata_source_file_path}=/usr/share/logstash/#{metadata_file_path}")
 

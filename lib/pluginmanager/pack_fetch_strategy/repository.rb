@@ -1,7 +1,7 @@
 # encoding: utf-8
 # In the context of the plugin manager no dependencies are currently loaded.
 # So we have to manually require the version file
-require_relative "../../../logstash-core/lib/logstash/version"
+require_relative "../../../lib/logstash/version"
 require "pluginmanager/pack_installer/remote"
 require "pluginmanager/utils/http_client"
 require "pluginmanager/ui"

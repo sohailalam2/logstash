@@ -15,7 +15,6 @@ namespace "docs" do
     args.with_defaults(:output => DEFAULT_DOC_DIRECTORY)
 
     require "bootstrap/environment"
-    require "logstash-core/logstash-core"
     LogStash::Bundler.setup!({:without => [:build]})
 
     require "logstash/docgen/logstash_generator"
