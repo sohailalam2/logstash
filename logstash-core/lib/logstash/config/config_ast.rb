@@ -1,6 +1,7 @@
 # encoding: utf-8
 require 'logstash/errors'
 require "treetop"
+require "logstash/settings"
 
 require "logstash/compiler/treetop_monkeypatches"
 
