@@ -1,5 +1,20 @@
 require "logstash/version"
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 namespace "artifact" do
 
   SNAPSHOT_BUILD = ENV["RELEASE"] != "1"
@@ -273,6 +288,10 @@ namespace "artifact" do
     require "fpm/errors" # TODO(sissel): fix this in fpm
     require "fpm/package/dir"
     require "fpm/package/gem" # TODO(sissel): fix this in fpm; rpm needs it.
+    require "childprocess/jruby/pump"
+    # TODO(ph): Cabin is closing the fd when it reach EOF, childprocess will attempt to write to it and hit an IOError.
+    # This will make a the thread dies, in 1.7.25 we had a Thread Death
+    require_relative "childprocess_patch"
 
     dir = FPM::Package::Dir.new
 
